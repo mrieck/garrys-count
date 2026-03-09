@@ -92,7 +92,9 @@ cd garryscount && bash uninstall.sh
 
 ## Ship even faster with SnipCSS
 
-If you're using Claude Code to build UI, check out [SnipCSS](https://www.snipcss.com/claude_plugin) — my Claude Code plugin that extracts CSS from any website and converts it to Tailwind instantly. Give your coding agent a reference website/section and getting pixel-perfect Tailwind that can quickly be integrated into your project.
+If you're using Claude Code to build UI, check out [SnipCSS](https://www.snipcss.com/claude_plugin) — my Claude Code plugin that extracts CSS from any website and converts it to Tailwind instantly. 
+
+Give your coding agent a reference website/section and get pixel-perfect Tailwind that can quickly be integrated into your project.
 
 ## License
 
