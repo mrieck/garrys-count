@@ -25,15 +25,23 @@ mkdir -p "$GARRYS_DIR"
 # Copy scripts
 cp "$SCRIPT_DIR/scripts/count-hook.sh" "$GARRYS_DIR/count-hook.sh"
 cp "$SCRIPT_DIR/scripts/statusline.sh" "$GARRYS_DIR/statusline.sh"
+cp "$SCRIPT_DIR/scripts/report.sh" "$GARRYS_DIR/report.sh"
 chmod +x "$GARRYS_DIR/count-hook.sh"
 chmod +x "$GARRYS_DIR/statusline.sh"
+chmod +x "$GARRYS_DIR/report.sh"
+
+# Install /garryscount skill
+SKILLS_DIR="${HOME}/.claude/skills/garryscount"
+mkdir -p "$SKILLS_DIR"
+cp "$SCRIPT_DIR/skills/garryscount/SKILL.md" "$SKILLS_DIR/SKILL.md"
+echo "Installed /garryscount report command"
 
 # Create default config if it doesn't exist
 if [[ ! -f "$GARRYS_DIR/config.json" ]]; then
   cat > "$GARRYS_DIR/config.json" <<'EOF'
 {
   "reset_hour": 5,
-  "count_mode": "garry"
+  "count_mode": "default"
 }
 EOF
   echo "Created config at $GARRYS_DIR/config.json"
@@ -93,7 +101,7 @@ echo ""
 echo "Done! Garry's Count is installed."
 echo ""
 echo "Configuration: $GARRYS_DIR/config.json"
-echo "  count_mode: \"garry\" (overcounts, funnier) or \"net\" (realistic)"
+echo "  count_mode: \"default\" (only new lines) or \"yc-mode\" (counts new + modified)"
 echo "  reset_hour: 5 (daily count resets at 5am)"
 echo ""
 echo "Restart Claude Code to see your count in the status bar."

@@ -43,7 +43,15 @@ else
   # Just remove scripts, keep data
   rm -f "$GARRYS_DIR/count-hook.sh"
   rm -f "$GARRYS_DIR/statusline.sh"
+  rm -f "$GARRYS_DIR/report.sh"
   echo "Removed scripts, kept daily count data in $GARRYS_DIR"
+fi
+
+# Remove skill
+SKILLS_DIR="${HOME}/.claude/skills/garryscount"
+if [[ -d "$SKILLS_DIR" ]]; then
+  rm -rf "$SKILLS_DIR"
+  echo "Removed /garryscount skill"
 fi
 
 echo ""

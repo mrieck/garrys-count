@@ -10,8 +10,10 @@ CONFIG_FILE="${GARRYS_DIR}/config.json"
 
 # Load config
 RESET_HOUR=5
+LABEL="lines of hand-written source code"
 if [[ -f "$CONFIG_FILE" ]]; then
   RESET_HOUR=$(jq -r '.reset_hour // 5' "$CONFIG_FILE" 2>/dev/null || echo 5)
+  LABEL=$(jq -r '.label // "lines of hand-written source code"' "$CONFIG_FILE" 2>/dev/null || echo "lines of hand-written source code")
 fi
 
 # Compute effective date
@@ -61,4 +63,4 @@ fi
 # Drain stdin (Claude Code sends session JSON but we don't need it)
 cat >/dev/null 2>&1 || true
 
-printf "${COLOR}Garry's Count: %s loc${RESET}" "$FORMATTED"
+printf "${COLOR}Garry's Count: %s %s${RESET}" "$FORMATTED" "$LABEL"
