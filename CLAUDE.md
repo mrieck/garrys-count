@@ -1,0 +1,26 @@
+# Garry's Count
+
+A parody project that tracks how many lines of code Claude Code writes per day, displayed in the Claude Code status bar.
+
+## How it works
+
+1. **PostToolUse hook** (`scripts/count-hook.sh`) fires after every Write/Edit/MultiEdit tool call, counts lines in the new content, and appends to a daily tally file at `~/.claude/garryscount/YYYY-MM-DD.json`
+2. **Status line** (`scripts/statusline.sh`) reads the tally file and displays `Garry's Count: X loc` in the status bar
+
+## Architecture
+
+- Hook receives JSON on stdin with `tool_name` and `tool_input` (file_path, content/new_string/old_string)
+- Daily tally files stored as JSON: `{"date":"...","total_lines":N,"count_mode":"...","last_updated":"..."}`
+- Config at `~/.claude/garryscount/config.json` with `reset_hour` (default 5) and `count_mode` ("garry" or "net")
+- Day boundary is at `reset_hour` (5am default), not midnight
+- Atomic file writes via temp + mv for concurrent session safety
+
+## Two counting modes
+
+- `"garry"` (default): every line Claude writes counts, even rewrites. Inflated numbers are the point.
+- `"net"`: for Edit, counts `new_string` lines minus `old_string` lines. More realistic.
+
+## Installation
+
+- `install.sh` copies scripts to `~/.claude/garryscount/`, adds hooks and statusLine to `~/.claude/settings.json`
+- Can also be used as a Claude Code plugin via `--plugin-dir`
