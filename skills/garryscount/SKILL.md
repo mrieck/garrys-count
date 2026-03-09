@@ -38,7 +38,9 @@ Format this data as a report. Follow these rules exactly:
 
 4. **Shipping speed** (only if `has_full_week` is true OR `days_with_data` >= 7):
    - If weekly total >= 100,000: show "🚀 Shipping at YC speed"
-   - If weekly total < 100,000: show "🏗️ Keep shipping"
+   - If weekly total >= 50,000: show "💪 Shipping at Founding Engineer speed"
+   - If weekly total >= 10,000: show "🏅 Shipping at Indie Hacker speed"
+   - If weekly total < 10,000: show "🚢 Heading towards the permanent underclass, get to shipping"
 
 5. **Count mode note**: At the bottom, show "Mode: {count_mode}" in italics
 
