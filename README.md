@@ -19,7 +19,7 @@ Garry's Count: 4,207 lines of hand-written source code
 ## Install
 
 ```bash
-git clone https://github.com/markrabey/garryscount.git && cd garryscount && bash install.sh
+git clone https://github.com/mrieck/garryscount.git && cd garryscount && bash install.sh
 ```
 
 Restart Claude Code. Start coding. Watch the number go up.
