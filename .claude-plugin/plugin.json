@@ -1,5 +1,0 @@
-{
-  "name": "garryscount",
-  "description": "Track how many lines of code Claude Code writes per day. Garry Tan wrote 200k LOC for a blog. Let's see what Claude can do.",
-  "version": "1.0.0"
-}

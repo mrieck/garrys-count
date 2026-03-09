@@ -10,7 +10,7 @@ But his post got me wondering... **"Am I shipping at YC speed?"** With Garry's C
 
 ### What it does
 
-Garry's Count is a Claude Code plugin that tracks how many lines of code Claude writes per day and displays a running total in your status bar.
+Garry's Count uses a Claude Code hook and skill to track how many lines of code Claude writes per day and display a running total in your status bar.
 
 ```
 Garry's Count: 4,207 lines of hand-written source code
@@ -84,24 +84,7 @@ cd garryscount && bash uninstall.sh
 
 - [Claude Code](https://claude.ai/code)
 - `jq` (`brew install jq` on macOS)
-
-## Plugin mode
-
-You can also load it as a Claude Code plugin (hooks only, no status line):
-
-```bash
-claude --plugin-dir /path/to/garryscount
-```
-
-For the status line, run `install.sh` or manually add to `~/.claude/settings.json`:
-
-```json
-{
-  "statusLine": {
-    "command": "~/.claude/garryscount/statusline.sh"
-  }
-}
-```
+- macOS or Linux (Windows users need [WSL](https://learn.microsoft.com/en-us/windows/wsl/install))
 
 ---
 

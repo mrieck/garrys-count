@@ -25,4 +25,3 @@ A parody project that tracks how many lines of code Claude Code writes per day, 
 ## Installation
 
 - `install.sh` copies scripts to `~/.claude/garryscount/`, adds hooks and statusLine to `~/.claude/settings.json`, installs `/garryscount` skill to `~/.claude/skills/garryscount/`
-- Can also be used as a Claude Code plugin via `--plugin-dir`
