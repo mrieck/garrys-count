@@ -1,10 +1,14 @@
 # Garry's Count
 
-> Ever wonder if you are shipping at YC speed? 
->
-> **Until now.**
+This week Garry Tan (CEO of YC) posted about writing 310K lines of "hand-written source code" in 45 days.
 
-<img src="assets/garry-tweet.jpeg" alt="Garry Tan's original post" width="500">
+<img src="assets/garry-tweet.jpeg" alt="Garry Tan's original post about 310K lines of hand-written source code" width="300">
+
+I actually [defended him on X](https://x.com/prodmarkllc/status/2030435027796779288) — we don't really know all the features he shipped.
+
+But his post got me wondering... **"Am I shipping at YC speed?"** With Garry's Count, I no longer have to guess.
+
+### What it does
 
 Garry's Count is a Claude Code plugin that tracks how many lines of code Claude writes per day and displays a running total in your status bar.
 
@@ -98,6 +102,12 @@ For the status line, run `install.sh` or manually add to `~/.claude/settings.jso
   }
 }
 ```
+
+---
+
+## Ship even faster
+
+If you're using Claude Code to build UI, check out [SnipCSS](https://www.snipcss.com/claude_plugin) — my other Claude Code plugin that extracts CSS from any website and converts it to Tailwind instantly. Stop guessing at styles, start shipping pixel-perfect.
 
 ## License
 
