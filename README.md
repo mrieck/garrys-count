@@ -36,7 +36,7 @@ Type `/garryscount` in Claude Code to get a Garry-style breakdown report:
 
 - Lines of code by file type, just like the tweet
 - Last 7 days of daily totals
-- Shipping speed label if you have a full week of data (300k+ lines = "Shipping at YC speed")
+- Shipping speed label if you have a full week of data (100k+ lines = "Shipping at YC speed")
 
 ## Configuration
 
@@ -92,7 +92,7 @@ cd garryscount && bash uninstall.sh
 
 ## Ship even faster with SnipCSS
 
-If you're using Claude Code to build UI, check out [SnipCSS](https://www.snipcss.com/claude_plugin) — my other Claude Code plugin that extracts CSS from any website and converts it to Tailwind instantly. Stop guessing at styles, start shipping pixel-perfect.
+If you're using Claude Code to build UI, check out [SnipCSS](https://www.snipcss.com/claude_plugin) — my Claude Code plugin that extracts CSS from any website and converts it to Tailwind instantly. Give your coding agent a reference website/section and getting pixel-perfect Tailwind that can quickly be integrated into your project.
 
 ## License
 
