@@ -28,7 +28,7 @@ Restart Claude Code. Start coding. Watch the number go up.
 
 A PostToolUse hook fires every time Claude writes or edits a file. It counts the lines and adds them to a daily tally stored at `~/.claude/garryscount/`. A status line script reads the tally and shows it in the status bar.
 
-The daily count resets at **5am** (configurable), because devs don't stop at midnight.
+The daily count resets at **5am** (configurable).
 
 ## Report command
 
@@ -36,7 +36,7 @@ Type `/garryscount` in Claude Code to get a Garry-style breakdown report:
 
 - Lines of code by file type, just like the tweet
 - Last 7 days of daily totals
-- Shipping speed label if you have a full week of data (100k+ lines = "Shipping at YC speed")
+- Shipping speed label if you have a full week of data (300k+ lines = "Shipping at YC speed")
 
 ## Configuration
 
@@ -55,7 +55,7 @@ Edit `~/.claude/garryscount/config.json`:
 | Mode | Description |
 |------|-------------|
 | `"default"` | **(default)** Net new lines only. For edits, subtracts old lines from new. |
-| `"yc-mode"` | Every line Claude writes counts, even if it rewrites the same file. Overcounting is a feature. |
+| `"yc-mode"` | Every line Claude writes or modifies counts, even if it rewrites the same file. Great for VC updates. |
 
 ### Label
 
@@ -74,6 +74,8 @@ The status bar changes color as Claude's daily output grows:
 - **Red** — 5,000-10,000 lines (on fire)
 - **Magenta** — 10,000+ lines (legendary)
 
+Note: As per best practices I haven't read any of the the code in this repo.  
+
 ## Uninstall
 
 ```bash
@@ -88,7 +90,7 @@ cd garryscount && bash uninstall.sh
 
 ---
 
-## Ship even faster
+## Ship even faster with SnipCSS
 
 If you're using Claude Code to build UI, check out [SnipCSS](https://www.snipcss.com/claude_plugin) — my other Claude Code plugin that extracts CSS from any website and converts it to Tailwind instantly. Stop guessing at styles, start shipping pixel-perfect.
 
