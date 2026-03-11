@@ -47,6 +47,12 @@ if [[ -n "$FILE_PATH" ]]; then
   fi
 fi
 
+# Detect git repo root for this file
+GIT_REPO=""
+if [[ -n "$FILE_PATH" ]]; then
+  GIT_REPO=$(git -C "$(dirname "$FILE_PATH")" rev-parse --show-toplevel 2>/dev/null || true)
+fi
+
 # Count lines based on tool type and counting mode
 LINES=0
 
@@ -89,7 +95,7 @@ case "$TOOL_NAME" in
 esac
 
 # Nothing to record
-if [[ "$LINES" -eq 0 ]]; then
+if [[ "$LINES" -eq 0 ]] && [[ -z "$GIT_REPO" ]]; then
   exit 0
 fi
 
@@ -99,9 +105,11 @@ mkdir -p "$GARRYS_DIR"
 # Atomic update: read current tally, add lines, write to temp, mv into place
 CURRENT_TOTAL=0
 CURRENT_BY_EXT='{}'
+CURRENT_REPOS='[]'
 if [[ -f "$TALLY_FILE" ]]; then
   CURRENT_TOTAL=$(jq -r '.total_lines // 0' "$TALLY_FILE" 2>/dev/null || echo 0)
   CURRENT_BY_EXT=$(jq -r '.by_extension // {}' "$TALLY_FILE" 2>/dev/null || echo '{}')
+  CURRENT_REPOS=$(jq -c '.repos // []' "$TALLY_FILE" 2>/dev/null || echo '[]')
 fi
 
 NEW_TOTAL=$((CURRENT_TOTAL + LINES))
@@ -121,6 +129,13 @@ else
   NEW_BY_EXT="$CURRENT_BY_EXT"
 fi
 
+# Update repos list (deduplicated)
+NEW_REPOS="$CURRENT_REPOS"
+if [[ -n "$GIT_REPO" ]]; then
+  NEW_REPOS=$(printf '%s' "$CURRENT_REPOS" | jq --arg repo "$GIT_REPO" \
+    'if any(. == $repo) then . else . + [$repo] end')
+fi
+
 TEMP_FILE=$(mktemp "${GARRYS_DIR}/.tally.XXXXXX")
 jq -n \
   --arg date "$EFFECTIVE_DATE" \
@@ -128,7 +143,8 @@ jq -n \
   --arg mode "$COUNT_MODE" \
   --arg updated "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
   --argjson by_ext "$NEW_BY_EXT" \
-  '{"date":$date,"total_lines":$total,"count_mode":$mode,"last_updated":$updated,"by_extension":$by_ext}' \
+  --argjson repos "$NEW_REPOS" \
+  '{"date":$date,"total_lines":$total,"count_mode":$mode,"last_updated":$updated,"by_extension":$by_ext,"repos":$repos}' \
   > "$TEMP_FILE"
 
 mv "$TEMP_FILE" "$TALLY_FILE"

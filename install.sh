@@ -26,15 +26,23 @@ mkdir -p "$GARRYS_DIR"
 cp "$SCRIPT_DIR/scripts/count-hook.sh" "$GARRYS_DIR/count-hook.sh"
 cp "$SCRIPT_DIR/scripts/statusline.sh" "$GARRYS_DIR/statusline.sh"
 cp "$SCRIPT_DIR/scripts/report.sh" "$GARRYS_DIR/report.sh"
+cp "$SCRIPT_DIR/scripts/goodnight-report.sh" "$GARRYS_DIR/goodnight-report.sh"
 chmod +x "$GARRYS_DIR/count-hook.sh"
 chmod +x "$GARRYS_DIR/statusline.sh"
 chmod +x "$GARRYS_DIR/report.sh"
+chmod +x "$GARRYS_DIR/goodnight-report.sh"
 
 # Install /garryscount skill
 SKILLS_DIR="${HOME}/.claude/skills/garryscount"
 mkdir -p "$SKILLS_DIR"
 cp "$SCRIPT_DIR/skills/garryscount/SKILL.md" "$SKILLS_DIR/SKILL.md"
 echo "Installed /garryscount report command"
+
+# Install /goodnight-garry skill
+GOODNIGHT_SKILLS_DIR="${HOME}/.claude/skills/goodnight-garry"
+mkdir -p "$GOODNIGHT_SKILLS_DIR"
+cp "$SCRIPT_DIR/skills/goodnight-garry/SKILL.md" "$GOODNIGHT_SKILLS_DIR/SKILL.md"
+echo "Installed /goodnight-garry command"
 
 # Create default config if it doesn't exist
 if [[ ! -f "$GARRYS_DIR/config.json" ]]; then
@@ -103,5 +111,9 @@ echo ""
 echo "Configuration: $GARRYS_DIR/config.json"
 echo "  count_mode: \"default\" (only new lines) or \"yc-mode\" (counts new + modified)"
 echo "  reset_hour: 5 (daily count resets at 5am)"
+echo ""
+echo "Commands:"
+echo "  /garryscount     - view today's LOC report"
+echo "  /goodnight-garry - commit and push all repos worked on today"
 echo ""
 echo "Restart Claude Code to see your count in the status bar."

@@ -44,14 +44,21 @@ else
   rm -f "$GARRYS_DIR/count-hook.sh"
   rm -f "$GARRYS_DIR/statusline.sh"
   rm -f "$GARRYS_DIR/report.sh"
+  rm -f "$GARRYS_DIR/goodnight-report.sh"
   echo "Removed scripts, kept daily count data in $GARRYS_DIR"
 fi
 
-# Remove skill
+# Remove skills
 SKILLS_DIR="${HOME}/.claude/skills/garryscount"
 if [[ -d "$SKILLS_DIR" ]]; then
   rm -rf "$SKILLS_DIR"
   echo "Removed /garryscount skill"
+fi
+
+GOODNIGHT_SKILLS_DIR="${HOME}/.claude/skills/goodnight-garry"
+if [[ -d "$GOODNIGHT_SKILLS_DIR" ]]; then
+  rm -rf "$GOODNIGHT_SKILLS_DIR"
+  echo "Removed /goodnight-garry skill"
 fi
 
 echo ""
