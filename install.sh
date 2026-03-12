@@ -50,7 +50,7 @@ if [[ ! -f "$GARRYS_DIR/config.json" ]]; then
 {
   "reset_hour": 5,
   "count_mode": "default",
-  "show_directory": true
+  "show_directory": false
 }
 EOF
   echo "Created config at $GARRYS_DIR/config.json"
