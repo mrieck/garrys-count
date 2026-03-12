@@ -11,9 +11,11 @@ CONFIG_FILE="${GARRYS_DIR}/config.json"
 # Load config
 RESET_HOUR=5
 LABEL="lines of hand-written source code"
+SHOW_DIRECTORY="true"
 if [[ -f "$CONFIG_FILE" ]]; then
   RESET_HOUR=$(jq -r '.reset_hour // 5' "$CONFIG_FILE" 2>/dev/null || echo 5)
   LABEL=$(jq -r '.label // "lines of hand-written source code"' "$CONFIG_FILE" 2>/dev/null || echo "lines of hand-written source code")
+  SHOW_DIRECTORY=$(jq -r '.show_directory // true' "$CONFIG_FILE" 2>/dev/null || echo "true")
 fi
 
 # Compute effective date
@@ -63,4 +65,12 @@ fi
 # Drain stdin (Claude Code sends session JSON but we don't need it)
 cat >/dev/null 2>&1 || true
 
-printf "${COLOR}Garry's Count: %s %s${RESET}" "$FORMATTED" "$LABEL"
+# Optionally append current directory in orange
+ORANGE='\033[38;5;208m'
+DIR_SUFFIX=""
+if [[ "$SHOW_DIRECTORY" != "false" ]]; then
+  DIR_DISPLAY="${PWD/#$HOME/~}"
+  DIR_SUFFIX=" ${ORANGE}${DIR_DISPLAY}${RESET}"
+fi
+
+printf "${COLOR}Garry's Count: %s %s${RESET}${DIR_SUFFIX}" "$FORMATTED" "$LABEL"

@@ -13,7 +13,7 @@ A parody project that tracks how many lines of code Claude Code writes per day, 
 - Hook receives JSON on stdin with `tool_name` and `tool_input` (file_path, content/new_string/old_string)
 - Daily tally files stored as JSON: `{"date":"...","total_lines":N,"count_mode":"...","last_updated":"...","by_extension":{".py":N,...}}`
 - Report script (`scripts/report.sh`) aggregates daily tally files into a JSON report for the skill
-- Config at `~/.claude/garryscount/config.json` with `reset_hour` (default 5) and `count_mode` ("default" or "yc-mode")
+- Config at `~/.claude/garryscount/config.json` with `reset_hour` (default 5), `count_mode` ("default" or "yc-mode"), and `show_directory` (true/false, default true — shows current directory in orange on the status line)
 - Day boundary is at `reset_hour` (5am default), not midnight
 - Atomic file writes via temp + mv for concurrent session safety
 
