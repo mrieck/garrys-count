@@ -46,7 +46,8 @@ Edit `~/.claude/garryscount/config.json`:
 {
   "reset_hour": 5,
   "count_mode": "default",
-  "label": "lines of hand-written source code"
+  "label": "lines of hand-written source code",
+  "show_directory": false
 }
 ```
 
@@ -60,6 +61,16 @@ Edit `~/.claude/garryscount/config.json`:
 ### Label
 
 The text shown after the number in the status bar. Default is `"lines of hand-written source code"`. Set to `"loc"` if you want it short.
+
+### Show directory
+
+Set `"show_directory": true` to append your current working directory to the status bar in orange:
+
+```
+Garry's Count: 4,207 lines of hand-written source code ~/Sites/github/myproject
+```
+
+Default is `false`.
 
 ### Reset hour
 
