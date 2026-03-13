@@ -23,7 +23,7 @@ Commit and push all repos that need it. Work through each path in the `repos` ar
    - Run `git -C {path} add -A`
    - Run `git -C {path} diff --cached --stat` to see what changed
    - Run `git -C {path} diff --cached` to read the actual diff
-   - Write a concise, accurate commit message based on what changed (1 sentence, present tense, e.g. "Add dark mode support to settings panel")
+   - Write a commit message based on what changed
    - Run `git -C {path} commit -m "{your message}"`
    - If commit fails, report the error and move to the next repo
 4. Check for unpushed commits: `git -C {path} rev-list @{u}..HEAD --count 2>/dev/null || echo "no-upstream"`
