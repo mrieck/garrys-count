@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Garry's Count Viewer</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1/themes/prism-tomorrow.min.css">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: #1a1a2e;
+    color: #e0e0e0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  header {
+    background: #16213e;
+    border-bottom: 1px solid #0f3460;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
+  }
+
+  header h1 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #e94560;
+    letter-spacing: 0.5px;
+  }
+
+  #tally-summary {
+    font-size: 12px;
+    color: #888;
+  }
+
+  #tally-summary span {
+    color: #4ecca3;
+    font-weight: 600;
+  }
+
+  #refresh-indicator {
+    margin-left: auto;
+    font-size: 11px;
+    color: #555;
+  }
+
+  .main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* Sidebar */
+  #sidebar {
+    width: 260px;
+    min-width: 200px;
+    background: #16213e;
+    border-right: 1px solid #0f3460;
+    overflow-y: auto;
+    flex-shrink: 0;
+  }
+
+  .project-group {
+    margin-bottom: 4px;
+  }
+
+  .project-header {
+    padding: 8px 12px 4px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #e94560;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    cursor: default;
+    user-select: none;
+  }
+
+  .file-item {
+    padding: 5px 12px 5px 20px;
+    font-size: 12px;
+    color: #aaa;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border-left: 2px solid transparent;
+    transition: background 0.1s, color 0.1s;
+  }
+
+  .file-item:hover {
+    background: #0f3460;
+    color: #e0e0e0;
+  }
+
+  .file-item.active {
+    background: #0f3460;
+    color: #4ecca3;
+    border-left-color: #4ecca3;
+  }
+
+  .file-item .file-time {
+    font-size: 10px;
+    color: #555;
+    float: right;
+    margin-left: 4px;
+  }
+
+  #empty-state {
+    padding: 32px 16px;
+    text-align: center;
+    color: #555;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  /* Content pane */
+  #content-pane {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: #0d1117;
+  }
+
+  #file-header {
+    padding: 8px 16px;
+    background: #161b22;
+    border-bottom: 1px solid #21262d;
+    font-size: 12px;
+    color: #8b949e;
+    flex-shrink: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  #file-header strong {
+    color: #e0e0e0;
+  }
+
+  #code-container {
+    flex: 1;
+    overflow: auto;
+  }
+
+  #code-container pre {
+    margin: 0;
+    padding: 16px;
+    min-height: 100%;
+    font-size: 13px;
+    line-height: 1.5;
+    background: #0d1117 !important;
+    border-radius: 0 !important;
+  }
+
+  #code-container code {
+    font-family: "JetBrains Mono", "Fira Code", "SF Mono", Menlo, monospace;
+  }
+
+  #placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #444;
+    font-size: 14px;
+  }
+
+  #error-msg {
+    padding: 16px;
+    color: #e94560;
+    font-size: 13px;
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Garry's Count</h1>
+  <div id="tally-summary">Loading...</div>
+  <div id="refresh-indicator">refreshing...</div>
+</header>
+
+<div class="main">
+  <div id="sidebar">
+    <div id="empty-state" style="display:none">
+      No files edited yet today.<br>Start coding!
+    </div>
+  </div>
+  <div id="content-pane">
+    <div id="file-header">Select a file from the sidebar</div>
+    <div id="error-msg"></div>
+    <div id="code-container">
+      <div id="placeholder">← Select a file to view its contents</div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1/plugins/autoloader/prism-autoloader.min.js"></script>
+<script>
+// Extension → Prism language map
+const EXT_LANG = {
+  js: 'javascript', jsx: 'jsx', ts: 'typescript', tsx: 'tsx',
+  py: 'python', rb: 'ruby', go: 'go', rs: 'rust', java: 'java',
+  c: 'c', h: 'c', cpp: 'cpp', hpp: 'cpp', cs: 'csharp',
+  sh: 'bash', bash: 'bash', zsh: 'bash', fish: 'bash',
+  html: 'html', htm: 'html', xml: 'xml', svg: 'xml',
+  css: 'css', scss: 'scss', sass: 'sass', less: 'less',
+  json: 'json', yaml: 'yaml', yml: 'yaml', toml: 'toml',
+  md: 'markdown', mdx: 'markdown',
+  sql: 'sql', graphql: 'graphql',
+  php: 'php', swift: 'swift', kt: 'kotlin', kts: 'kotlin',
+  r: 'r', lua: 'lua', vim: 'vim', tf: 'hcl', hcl: 'hcl',
+  dockerfile: 'docker', makefile: 'makefile',
+};
+
+Prism.plugins.autoloader.languages_path =
+  'https://cdn.jsdelivr.net/npm/prismjs@1/components/';
+
+let selectedPath = null;
+let knownPaths = new Set();
+
+function basename(path) {
+  return path.split('/').pop();
+}
+
+function projectLabel(projectPath) {
+  if (!projectPath) return '(no project)';
+  return projectPath.split('/').pop() || projectPath;
+}
+
+function formatTime(isoStr) {
+  if (!isoStr) return '';
+  try {
+    const d = new Date(isoStr);
+    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  } catch { return ''; }
+}
+
+function getLang(path) {
+  const ext = path.split('.').pop().toLowerCase();
+  return EXT_LANG[ext] || 'plain';
+}
+
+async function loadTally() {
+  try {
+    const r = await fetch('/api/tally');
+    const data = await r.json();
+    const total = data.total_lines ?? 0;
+    document.getElementById('tally-summary').innerHTML =
+      `Today: <span>${total.toLocaleString()}</span> LOC`;
+  } catch {}
+}
+
+async function loadFiles() {
+  try {
+    const r = await fetch('/api/files');
+    const files = await r.json();
+    renderSidebar(files);
+  } catch {}
+  document.getElementById('refresh-indicator').textContent =
+    'last refresh ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+}
+
+function renderSidebar(files) {
+  const sidebar = document.getElementById('sidebar');
+  const empty = document.getElementById('empty-state');
+
+  if (files.length === 0) {
+    // Clear existing project groups
+    Array.from(sidebar.querySelectorAll('.project-group')).forEach(el => el.remove());
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  // Group by project
+  const byProject = {};
+  for (const f of files) {
+    const proj = f.project || '';
+    if (!byProject[proj]) byProject[proj] = [];
+    byProject[proj].push(f);
+  }
+
+  // Sort each group newest first
+  for (const g of Object.values(byProject)) {
+    g.sort((a, b) => (b.time || '').localeCompare(a.time || ''));
+  }
+
+  // Add new files to sidebar without disturbing existing DOM
+  for (const [proj, projFiles] of Object.entries(byProject)) {
+    let group = sidebar.querySelector(`[data-project="${CSS.escape(proj)}"]`);
+    if (!group) {
+      group = document.createElement('div');
+      group.className = 'project-group';
+      group.dataset.project = proj;
+
+      const header = document.createElement('div');
+      header.className = 'project-header';
+      header.textContent = projectLabel(proj);
+      header.title = proj;
+      group.appendChild(header);
+      sidebar.appendChild(group);
+    }
+
+    for (const f of projFiles) {
+      if (knownPaths.has(f.path)) continue;
+      knownPaths.add(f.path);
+
+      const item = document.createElement('div');
+      item.className = 'file-item' + (f.path === selectedPath ? ' active' : '');
+      item.dataset.path = f.path;
+      item.title = f.path;
+      item.innerHTML = `${basename(f.path)}<span class="file-time">${formatTime(f.time)}</span>`;
+      item.addEventListener('click', () => openFile(f.path));
+      group.appendChild(item);
+    }
+  }
+}
+
+async function openFile(path) {
+  // Update active state
+  document.querySelectorAll('.file-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.path === path);
+  });
+
+  selectedPath = path;
+  document.getElementById('file-header').innerHTML = `<strong>${basename(path)}</strong> — ${path}`;
+
+  const container = document.getElementById('code-container');
+  const errorMsg = document.getElementById('error-msg');
+  container.innerHTML = '<div id="placeholder" style="color:#555;padding:16px">Loading...</div>';
+  errorMsg.style.display = 'none';
+
+  try {
+    const r = await fetch('/api/content?path=' + encodeURIComponent(path));
+    const data = await r.json();
+    if (data.error) {
+      errorMsg.textContent = 'Error: ' + data.error;
+      errorMsg.style.display = 'block';
+      container.innerHTML = '';
+      return;
+    }
+
+    const lang = getLang(path);
+    const pre = document.createElement('pre');
+    const code = document.createElement('code');
+    code.className = `language-${lang}`;
+    code.textContent = data.content;
+    pre.appendChild(code);
+    container.innerHTML = '';
+    container.appendChild(pre);
+    Prism.highlightElement(code);
+  } catch (e) {
+    errorMsg.textContent = 'Failed to load file: ' + e.message;
+    errorMsg.style.display = 'block';
+    container.innerHTML = '';
+  }
+}
+
+async function refresh() {
+  await Promise.all([loadTally(), loadFiles()]);
+}
+
+// Initial load
+refresh();
+
+// Auto-refresh every 5 seconds
+setInterval(refresh, 5000);
+</script>
+</body>
+</html>

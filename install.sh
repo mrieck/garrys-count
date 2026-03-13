@@ -27,10 +27,15 @@ cp "$SCRIPT_DIR/scripts/count-hook.sh" "$GARRYS_DIR/count-hook.sh"
 cp "$SCRIPT_DIR/scripts/statusline.sh" "$GARRYS_DIR/statusline.sh"
 cp "$SCRIPT_DIR/scripts/report.sh" "$GARRYS_DIR/report.sh"
 cp "$SCRIPT_DIR/scripts/goodnight-report.sh" "$GARRYS_DIR/goodnight-report.sh"
+cp "$SCRIPT_DIR/scripts/viewer.py" "$GARRYS_DIR/viewer.py"
+cp "$SCRIPT_DIR/scripts/garry-viewer.sh" "$GARRYS_DIR/garry-viewer.sh"
+cp "$SCRIPT_DIR/viewer/index.html" "$GARRYS_DIR/index.html"
 chmod +x "$GARRYS_DIR/count-hook.sh"
 chmod +x "$GARRYS_DIR/statusline.sh"
 chmod +x "$GARRYS_DIR/report.sh"
 chmod +x "$GARRYS_DIR/goodnight-report.sh"
+chmod +x "$GARRYS_DIR/viewer.py"
+chmod +x "$GARRYS_DIR/garry-viewer.sh"
 
 # Install /garryscount skill
 SKILLS_DIR="${HOME}/.claude/skills/garryscount"
@@ -50,10 +55,17 @@ if [[ ! -f "$GARRYS_DIR/config.json" ]]; then
 {
   "reset_hour": 5,
   "count_mode": "default",
-  "show_directory": false
+  "show_directory": false,
+  "editor": "none",
+  "viewer_port": 7777
 }
 EOF
   echo "Created config at $GARRYS_DIR/config.json"
+else
+  # Add new fields to existing config if missing
+  TEMP=$(mktemp)
+  jq '. + {"editor": (.editor // "none"), "viewer_port": (.viewer_port // 7777)}' "$GARRYS_DIR/config.json" > "$TEMP"
+  mv "$TEMP" "$GARRYS_DIR/config.json"
 fi
 
 # Add statusLine to settings.json
@@ -106,6 +118,35 @@ else
   echo "Added PostToolUse hook to $SETTINGS_FILE"
 fi
 
+# Viewer setup
+echo ""
+echo "--- Garry's Count Viewer ---"
+echo "Opens files Claude edits in a browser sidebar, grouped by project."
+echo ""
+echo "  1) none        - skip viewer setup"
+echo "  2) garry-viewer - browser-based viewer at http://localhost:7777"
+echo ""
+read -p "Enable viewer? [1/2, default 1]: " -n 1 -r VIEWER_CHOICE
+echo
+
+if [[ "$VIEWER_CHOICE" == "2" ]]; then
+  TEMP=$(mktemp)
+  jq '.editor = "garry-viewer"' "$GARRYS_DIR/config.json" > "$TEMP"
+  mv "$TEMP" "$GARRYS_DIR/config.json"
+  echo "Enabled garry-viewer (files will appear at http://localhost:7777)"
+
+  echo ""
+  read -p "Auto-start viewer on login? (y/N) " -n 1 -r
+  echo
+  if [[ $REPLY =~ ^[Yy]$ ]]; then
+    "$GARRYS_DIR/garry-viewer.sh" install-autostart
+  else
+    echo "To start manually: $GARRYS_DIR/garry-viewer.sh start"
+  fi
+else
+  echo "Viewer skipped. Enable later by setting \"editor\": \"garry-viewer\" in $GARRYS_DIR/config.json"
+fi
+
 echo ""
 echo "Done! Garry's Count is installed."
 echo ""
@@ -116,5 +157,8 @@ echo ""
 echo "Commands:"
 echo "  /garryscount     - view today's LOC report"
 echo "  /goodnight-garry - commit and push all repos worked on today"
+if [[ "${VIEWER_CHOICE:-}" == "2" ]]; then
+  echo "  garry-viewer.sh  - start/stop/open the file viewer"
+fi
 echo ""
 echo "Restart Claude Code to see your count in the status bar."

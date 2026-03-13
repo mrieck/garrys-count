@@ -14,9 +14,11 @@ INPUT=$(cat)
 # Load config (defaults: reset at 5am, garry mode)
 RESET_HOUR=5
 COUNT_MODE="default"
+EDITOR_TYPE="none"
 if [[ -f "$CONFIG_FILE" ]]; then
   RESET_HOUR=$(echo "$CONFIG_FILE" | xargs cat | jq -r '.reset_hour // 5')
   COUNT_MODE=$(echo "$CONFIG_FILE" | xargs cat | jq -r '.count_mode // "default"')
+  EDITOR_TYPE=$(echo "$CONFIG_FILE" | xargs cat | jq -r '.editor // "none"')
 fi
 
 # Compute effective date (before reset_hour = yesterday's date)
@@ -37,6 +39,12 @@ TALLY_FILE="${GARRYS_DIR}/${EFFECTIVE_DATE}.json"
 # Extract tool name and file path
 TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // empty')
 FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
+
+# Plan files appear in the viewer but don't count toward LOC
+SKIP_COUNT=0
+if [[ "$FILE_PATH" == *"/.claude/plans/"* ]]; then
+  SKIP_COUNT=1
+fi
 
 # Extract file extension for per-language tracking
 EXT=""
@@ -94,8 +102,13 @@ case "$TOOL_NAME" in
     ;;
 esac
 
+# Plan files: don't count lines but still record the file entry
+if [[ "$SKIP_COUNT" -eq 1 ]]; then
+  LINES=0
+fi
+
 # Nothing to record
-if [[ "$LINES" -eq 0 ]] && [[ -z "$GIT_REPO" ]]; then
+if [[ "$LINES" -eq 0 ]] && [[ -z "$GIT_REPO" ]] && [[ "$SKIP_COUNT" -eq 0 ]]; then
   exit 0
 fi
 
@@ -106,10 +119,22 @@ mkdir -p "$GARRYS_DIR"
 CURRENT_TOTAL=0
 CURRENT_BY_EXT='{}'
 CURRENT_REPOS='[]'
+CURRENT_FILES='[]'
 if [[ -f "$TALLY_FILE" ]]; then
   CURRENT_TOTAL=$(jq -r '.total_lines // 0' "$TALLY_FILE" 2>/dev/null || echo 0)
   CURRENT_BY_EXT=$(jq -r '.by_extension // {}' "$TALLY_FILE" 2>/dev/null || echo '{}')
   CURRENT_REPOS=$(jq -c '.repos // []' "$TALLY_FILE" 2>/dev/null || echo '[]')
+  CURRENT_FILES=$(jq -c '.files_edited // []' "$TALLY_FILE" 2>/dev/null || echo '[]')
+fi
+
+# Build file entry for tracking
+FILE_ENTRY=""
+if [[ -n "$FILE_PATH" ]]; then
+  FILE_ENTRY=$(jq -n \
+    --arg path "$FILE_PATH" \
+    --arg project "${GIT_REPO:-}" \
+    --arg time "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+    '{"path":$path,"project":$project,"time":$time}')
 fi
 
 NEW_TOTAL=$((CURRENT_TOTAL + LINES))
@@ -136,6 +161,14 @@ if [[ -n "$GIT_REPO" ]]; then
     'if any(. == $repo) then . else . + [$repo] end')
 fi
 
+# Update files_edited list (upsert by path, cap at 500)
+NEW_FILES="$CURRENT_FILES"
+if [[ -n "$FILE_ENTRY" ]]; then
+  NEW_FILES=$(printf '%s' "$CURRENT_FILES" | jq \
+    --argjson entry "$FILE_ENTRY" \
+    'map(select(.path != $entry.path)) + [$entry] | .[-500:]')
+fi
+
 TEMP_FILE=$(mktemp "${GARRYS_DIR}/.tally.XXXXXX")
 jq -n \
   --arg date "$EFFECTIVE_DATE" \
@@ -144,7 +177,17 @@ jq -n \
   --arg updated "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
   --argjson by_ext "$NEW_BY_EXT" \
   --argjson repos "$NEW_REPOS" \
-  '{"date":$date,"total_lines":$total,"count_mode":$mode,"last_updated":$updated,"by_extension":$by_ext,"repos":$repos}' \
+  --argjson files "$NEW_FILES" \
+  '{"date":$date,"total_lines":$total,"count_mode":$mode,"last_updated":$updated,"by_extension":$by_ext,"repos":$repos,"files_edited":$files}' \
   > "$TEMP_FILE"
 
 mv "$TEMP_FILE" "$TALLY_FILE"
+
+# Auto-start garry-viewer if configured and not running
+if [[ "$EDITOR_TYPE" == "garry-viewer" ]] && [[ -f "${GARRYS_DIR}/viewer.py" ]]; then
+  VIEWER_PORT=$(jq -r '.viewer_port // 7777' "$CONFIG_FILE" 2>/dev/null || echo 7777)
+  if ! lsof -ti ":${VIEWER_PORT}" >/dev/null 2>&1; then
+    nohup python3 "${GARRYS_DIR}/viewer.py" > "${GARRYS_DIR}/viewer.log" 2>&1 &
+    disown
+  fi
+fi

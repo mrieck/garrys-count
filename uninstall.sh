@@ -32,6 +32,13 @@ if [[ -f "$SETTINGS_FILE" ]] && jq -e '.hooks.PostToolUse' "$SETTINGS_FILE" >/de
   echo "Removed hook from $SETTINGS_FILE"
 fi
 
+# Stop viewer and remove LaunchAgent if present
+VIEWER_MGMT="${GARRYS_DIR}/garry-viewer.sh"
+if [[ -f "$VIEWER_MGMT" ]]; then
+  "$VIEWER_MGMT" uninstall-autostart 2>/dev/null || true
+  "$VIEWER_MGMT" stop 2>/dev/null || true
+fi
+
 # Ask about data
 echo ""
 read -p "Delete daily count history? (y/N) " -n 1 -r
@@ -45,6 +52,9 @@ else
   rm -f "$GARRYS_DIR/statusline.sh"
   rm -f "$GARRYS_DIR/report.sh"
   rm -f "$GARRYS_DIR/goodnight-report.sh"
+  rm -f "$GARRYS_DIR/viewer.py"
+  rm -f "$GARRYS_DIR/garry-viewer.sh"
+  rm -f "$GARRYS_DIR/index.html"
   echo "Removed scripts, kept daily count data in $GARRYS_DIR"
 fi
 
