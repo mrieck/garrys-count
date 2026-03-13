@@ -1,7 +1,6 @@
 ---
 name: goodnight-garry
 description: Commit and push all repos worked on today, then show a summary
-disable-model-invocation: true
 ---
 
 # Goodnight, Garry
@@ -22,7 +21,10 @@ Commit and push all repos that need it. Work through each path in the `repos` ar
 2. If the directory doesn't exist or the git command fails: report "Skipped (not found)"
 3. If the working tree is dirty (status output is non-empty):
    - Run `git -C {path} add -A`
-   - Run `git -C {path} commit -m "WIP: goodnight commit"`
+   - Run `git -C {path} diff --cached --stat` to see what changed
+   - Run `git -C {path} diff --cached` to read the actual diff
+   - Write a concise, accurate commit message based on what changed (1 sentence, present tense, e.g. "Add dark mode support to settings panel")
+   - Run `git -C {path} commit -m "{your message}"`
    - If commit fails, report the error and move to the next repo
 4. Check for unpushed commits: `git -C {path} rev-list @{u}..HEAD --count 2>/dev/null || echo "no-upstream"`
 5. If the result is a number > 0 or "no-upstream":
