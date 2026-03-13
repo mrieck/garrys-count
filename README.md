@@ -38,6 +38,12 @@ Type `/garryscount` in Claude Code to get a Garry-style breakdown report:
 - Last 7 days of daily totals
 - Shipping speed label if you have a full week of data (100k+ lines = "Shipping at YC speed")
 
+## Goodnight command
+
+Type `/goodnight-garry` in Claude Code to commit and push all repos you worked on today in one shot.
+
+Claude reads the diff for each repo, writes an accurate commit message, and pushes. Finishes with a summary table of every repo and what was done.
+
 ## Configuration
 
 Edit `~/.claude/garryscount/config.json`:
